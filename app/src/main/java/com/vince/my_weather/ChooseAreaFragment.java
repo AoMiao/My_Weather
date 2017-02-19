@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -69,6 +70,30 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         queryProvince();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (currentLevel == LEVEL_PROVINCE) {
+                    selectProvince = provinceList.get(i);
+                    queryCity();
+                } else if (currentLevel == LEVEL_CITY) {
+                    selectCity = cityList.get(i);
+                    queryCounty();
+                } else if (currentLevel == LEVEL_COUNTY) {
+
+                }
+            }
+        });
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentLevel == LEVEL_CITY) {
+                    queryProvince();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    queryCity();
+                }
+            }
+        });
     }
 
     public void queryProvince() {
@@ -81,10 +106,45 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
-            currentLevel = LEVEL_PROVINCE;
+            currentLevel = LEVEL_PROVINCE;//当前等级为省等级，标明显示的是省列表的数据
         } else {
             String address = "http://guolin.tech/api/china";
             queryFormServer(address, "province");
+        }
+    }
+
+    public void queryCity() {
+        title.setText(selectProvince.getProvinceName());
+        cityList = DataSupport.where("provinceId=?", String.valueOf(selectProvince.getId())).find(City.class);
+        if (cityList.size() > 0) {
+            datalist.clear();
+            for (City c : cityList) {
+                datalist.add(c.getCityName());
+            }
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            currentLevel = LEVEL_CITY;
+        } else {
+            String address = "http://guolin.tech/api/china/" + selectProvince.getProvinceCode();
+            queryFormServer(address, "city");
+        }
+
+    }
+
+    public void queryCounty() {
+        title.setText(selectCity.getCityName());
+        countyList = DataSupport.where("cityId=?", String.valueOf(selectCity.getId())).find(County.class);
+        if (countyList.size() > 0) {
+            datalist.clear();
+            for (County c : countyList) {
+                datalist.add(c.getCountyName());
+            }
+            adapter.notifyDataSetChanged();
+            listView.setSelection(0);
+            currentLevel = LEVEL_COUNTY;
+        } else {
+            String address = "http://guolin.tech/api/china/" + selectProvince.getProvinceCode() + "/" + selectCity.getCityCode();
+            queryFormServer(address, "county");
         }
     }
 
@@ -101,6 +161,10 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
                 String data = response.body().string();//获取服务器返回的数据
                 if (type.equals("province")) {
                     flag = Utility.handleProvinceResponse(data);//解析数据把省数据存到本地数据库
+                } else if (type.equals("city")) {//这里的ID是省类的id字段，不是code
+                    flag = Utility.handleCityResponse(data, selectProvince.getId());//先把城市存到本地，还把省id联系起来
+                } else if (type.equals("county")) {
+                    flag = Utility.handleCountyResponse(data, selectCity.getId());
                 }
                 if (flag) {
                     getActivity().runOnUiThread(new Runnable() {//回到主线程修改UI
@@ -108,6 +172,10 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
                         public void run() {
                             if (type.equals("province")) {
                                 queryProvince();
+                            } else if (type.equals("city")) {
+                                queryCity();
+                            } else if (type.equals("county")) {
+                                queryCounty();
                             }
                         }
                     });
