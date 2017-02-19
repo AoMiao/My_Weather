@@ -3,6 +3,8 @@ package com.vince.my_weather;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import org.litepal.tablemanager.Connector;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
