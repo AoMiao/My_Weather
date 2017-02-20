@@ -1,5 +1,6 @@
 package com.vince.my_weather;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,7 +22,6 @@ import com.vince.my_weather.util.HttpUtil;
 import com.vince.my_weather.util.Utility;
 
 import org.litepal.crud.DataSupport;
-import org.litepal.tablemanager.Connector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +80,11 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
                     selectCity = cityList.get(i);
                     queryCounty();
                 } else if (currentLevel == LEVEL_COUNTY) {
-
+                    String weatherCode = countyList.get(i).getWeatherCode();
+                    Intent intent = new Intent(getActivity(),WeatherAcitivity.class);
+                    intent.putExtra("weatherCode",weatherCode);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });

@@ -2,9 +2,11 @@ package com.vince.my_weather.util;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
 import com.vince.my_weather.db.City;
 import com.vince.my_weather.db.County;
 import com.vince.my_weather.db.Province;
+import com.vince.my_weather.db.Weather;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,5 +73,16 @@ public class Utility {//处理服务器返回的数据，解析存到本地数�
             }
         }
         return false;
+    }
+    public static Weather handleWeatherResponse(String response){//把天气信息解析成一个类（Weather）
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather5");
+            String weatherContent = jsonArray.get(0).toString();
+            return new Gson().fromJson(weatherContent,Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
