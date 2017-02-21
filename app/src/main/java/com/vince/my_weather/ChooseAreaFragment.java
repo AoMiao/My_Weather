@@ -1,9 +1,11 @@
 package com.vince.my_weather;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,10 +83,19 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
                     queryCounty();
                 } else if (currentLevel == LEVEL_COUNTY) {
                     String weatherCode = countyList.get(i).getWeatherCode();
-                    Intent intent = new Intent(getActivity(),WeatherAcitivity.class);
-                    intent.putExtra("weatherCode",weatherCode);
-                    startActivity(intent);
-                    getActivity().finish();
+
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherAcitivity.class);
+                        intent.putExtra("weatherCode", weatherCode);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if(getActivity()instanceof WeatherAcitivity){
+                        WeatherAcitivity weatherAcitivity = (WeatherAcitivity) getActivity();
+                        weatherAcitivity.drawerLayout.closeDrawer(GravityCompat.START);
+                        weatherAcitivity.swipe_refresh.setRefreshing(true);
+                        weatherAcitivity.weatherCode = weatherCode;
+                        weatherAcitivity.queryFormServer(weatherCode);
+                    }
                 }
             }
         });
