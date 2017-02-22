@@ -4,7 +4,10 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_margin="15dp"
-    android:background="#8000">
+    android:background="#40000000">
+
+    <!--android:background="#8000"-->
+
     <TextView
         android:text="天气预报"
         android:layout_marginTop="15dp"
