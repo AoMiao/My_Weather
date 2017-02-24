@@ -2,7 +2,9 @@ package com.vince.my_weather;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -11,11 +13,9 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,6 +30,8 @@ import com.vince.my_weather.util.HttpUtil;
 import com.vince.my_weather.util.Utility;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -62,6 +64,8 @@ public class WeatherAcitivity extends AppCompatActivity {
     private Button choose_button;
     public DrawerLayout drawerLayout;
     public String weatherCode = null;//这里定义一个公共的天气代码，以便于外面可以设置
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private ImageView now_png;
 
 
     @Override
@@ -84,7 +88,6 @@ public class WeatherAcitivity extends AppCompatActivity {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-
         setContentView(R.layout.weather_layout);
 
         weather_scrollview = findViewById(R.id.weather_scrollview);
@@ -103,6 +106,7 @@ public class WeatherAcitivity extends AppCompatActivity {
         choose_button = (Button) findViewById(R.id.choose_button);
         swipe_refresh.setColorSchemeResources(R.color.colorPrimary);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        now_png = (ImageView) findViewById(R.id.now_png);
 
 
         SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(this);
@@ -118,6 +122,7 @@ public class WeatherAcitivity extends AppCompatActivity {
             weatherCode = getIntent().getStringExtra("weatherCode");//没缓存从跳转过来的界面获取天气代码
             weather_scrollview.setVisibility(View.INVISIBLE);//请求数据时把天气界面设为不可见
             queryFormServer(weatherCode);
+
         }
 
         if(imgCache!=null){//有缓存的话就直接用缓存载图，没有就去访问网络
@@ -145,6 +150,7 @@ public class WeatherAcitivity extends AppCompatActivity {
         update_time.setText(weather.basic.update.updateTime.split(" ")[1]);
         tmp_text.setText(weather.now.temperature + "°C");
         weather_info_text.setText(weather.now.weatherMessage.info);
+        Glide.with(this).load("http://files.heweather.com/cond_icon/"+weather.now.weatherMessage.code+".png").into(now_png);
         if (weather.aqi != null) {//有的城市天气没有AQI指数
             aqi_text.setText(weather.aqi.city.aqi);
             pm25_text.setText(weather.aqi.city.pm25);
@@ -162,13 +168,21 @@ public class WeatherAcitivity extends AppCompatActivity {
             TextView forecast_info_text = (TextView) view.findViewById(R.id.info_text);
             TextView forecast_max_text = (TextView) view.findViewById(R.id.max_text);
             TextView forecast_min_text = (TextView) view.findViewById(R.id.min_text);
-            forecast_date_text.setText(forecast.date);
+            ImageView png = (ImageView) view.findViewById(R.id.png);
+            Glide.with(this).load("http://files.heweather.com/cond_icon/"+forecast.weatherMessage.png+".png").into(png);
+            String today = sdf.format(new Date());
+            if(forecast.date.equals(today)){
+                forecast_date_text.setText("今天");
+            }else {
+                forecast_date_text.setText(forecast.date.split("-")[1]+"月"+forecast.date.split("-")[2]+"日");
+            }
             forecast_info_text.setText(forecast.weatherMessage.info);
-            forecast_max_text.setText(forecast.temperature.max);
-            forecast_min_text.setText(forecast.temperature.min);
+            forecast_max_text.setText(forecast.temperature.max + "°C");
+            forecast_min_text.setText(forecast.temperature.min + "°C");
+            Log.d("ne",forecast.weatherMessage.png);
             forecast_layout.addView(view);
-            weather_scrollview.setVisibility(View.VISIBLE);
         }
+        weather_scrollview.setVisibility(View.VISIBLE);
         Intent intent = new Intent(this, UpdateService.class);
         startService(intent);//每次显示天气信息都会打开后台开始计时
     }

@@ -15,5 +15,6 @@ public class Now {
     public class WeatherMessage{
         @SerializedName("txt")
         public String info;
+        public String code;
     }
 }

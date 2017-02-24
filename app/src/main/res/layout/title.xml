@@ -9,7 +9,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="15dp"
         android:layout_alignParentLeft="true"
-        android:background="@drawable/home"/>
+        android:background="@drawable/ic_home"/>
     <TextView
         android:textSize="20sp"
         android:textColor="#fff"
