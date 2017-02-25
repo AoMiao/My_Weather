@@ -9,5 +9,6 @@ public class AQI {
     public class AQIcity{
         public String aqi;
         public String pm25;
+        public String qlty;
     }
 }

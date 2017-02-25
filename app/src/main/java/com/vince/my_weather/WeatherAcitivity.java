@@ -1,12 +1,15 @@
 package com.vince.my_weather;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
@@ -66,23 +69,16 @@ public class WeatherAcitivity extends AppCompatActivity {
     public String weatherCode = null;//这里定义一个公共的天气代码，以便于外面可以设置
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private ImageView now_png;
+    public Weather weather;
+
+
+
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
 
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                    | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-        }*/
         if(Build.VERSION.SDK_INT>=21){//android5.0以上把布局充满整个手机屏幕,并把状态栏设置成透明
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -115,9 +111,10 @@ public class WeatherAcitivity extends AppCompatActivity {
         //定义一个全局变量的天气代码
 
         if (weatherCache != null) {
-            Weather weather = Utility.handleWeatherResponse(weatherCache);
+            weather = Utility.handleWeatherResponse(weatherCache);
             weatherCode = weather.basic.weatherCode;//有缓存有从缓存中取出天气代码
             showWeatherInfo(weather);
+
         }else {
             weatherCode = getIntent().getStringExtra("weatherCode");//没缓存从跳转过来的界面获取天气代码
             weather_scrollview.setVisibility(View.INVISIBLE);//请求数据时把天气界面设为不可见
@@ -143,6 +140,13 @@ public class WeatherAcitivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this,UpdateService.class);
+        stopService(intent);
+        super.onDestroy();
     }
 
     public void showWeatherInfo(Weather weather) {//显示天气信息
@@ -244,5 +248,4 @@ public class WeatherAcitivity extends AppCompatActivity {
             }
         });
     }
-
 }
