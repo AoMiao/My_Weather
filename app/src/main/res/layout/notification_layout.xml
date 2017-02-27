@@ -13,10 +13,16 @@
         <ImageView
             android:src="@drawable/p100"
             android:layout_width="16dp"
-            android:layout_height="16dp" />
+            android:layout_height="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"/>
 
         <TextView
-            android:text="欧酷天气"
+            android:text="我的天气"
+            android:textSize="18sp"
+            android:textColor="#fff"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -26,10 +32,11 @@
     <RelativeLayout
         android:layout_margin="15dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp">
         <TextView
             android:id="@+id/notification_now_tmp"
-            android:textColor="#000000"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
@@ -38,7 +45,7 @@
             ></TextView>
         <TextView
             android:id="@+id/notification_now_ptime"
-            android:textColor="#000000"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -47,7 +54,7 @@
             />
         <TextView
             android:id="@+id/notification_now_city"
-            android:textColor="#000000"
+            android:textColor="#fff"
             android:layout_marginRight="15dp"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/notification_now_ptime"
@@ -56,6 +63,7 @@
 
         <TextView
             android:id="@+id/notification_now_aqi"
+            android:textColor="#fff"
             android:layout_marginRight="15dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,30 +76,37 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="3dp"
         >
         <ImageView
             android:background="#FFFFFF"
             android:id="@+id/notification_now_png"
             android:layout_width="16dp"
             android:layout_height="16dp"
+            android:layout_gravity="center_vertical"
             android:scaleType="centerCrop"
             android:layout_marginLeft="15dp"
              />
         <TextView
             android:id="@+id/notification_now_info"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"/>
         <TextView
             android:id="@+id/notification_now_min"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:text="~"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/notification_now_max"
+            android:textColor="#fff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

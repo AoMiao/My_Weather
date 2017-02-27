@@ -106,7 +106,7 @@ public class UpdateService extends Service {
                     Intent intent = new Intent(UpdateService.this, WeatherAcitivity.class);
                     PendingIntent pi = PendingIntent.getActivity(UpdateService.this, 0, intent, 0);
                     RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_layout);
-                    remoteViews.setTextViewText(R.id.notification_now_ptime, weather1.basic.update.updateTime);
+                    remoteViews.setTextViewText(R.id.notification_now_ptime, weather1.basic.update.updateTime.split(" ")[1]+"发布");
                     remoteViews.setTextViewText(R.id.notification_now_city, weather1.basic.cityName);
                     remoteViews.setTextViewText(R.id.notification_now_tmp, weather1.now.temperature + "°C");
                     remoteViews.setTextViewText(R.id.notification_now_info, weather1.now.weatherMessage.info);
@@ -119,25 +119,25 @@ public class UpdateService extends Service {
                                 remoteViews.setTextViewText(R.id.notification_now_min, forecast.temperature.min + "°C");
                             }
                             if (flag == 1) {
-                                remoteViews.setTextViewText(R.id.notification_forecast_date, forecast.date.split("-")[1]+"月"+forecast.date.split("-")[2]+"日");
-                                remoteViews.setTextViewText(R.id.notification_forecast_max, forecast.temperature.max);
-                                remoteViews.setTextViewText(R.id.notification_forecast_min, forecast.temperature.min);
+                                remoteViews.setTextViewText(R.id.notification_forecast_date, forecast.date.split("-")[1]+"-"+forecast.date.split("-")[2]);
+                                remoteViews.setTextViewText(R.id.notification_forecast_max, forecast.temperature.max+ "°C");
+                                remoteViews.setTextViewText(R.id.notification_forecast_min, forecast.temperature.min+ "°C");
                                 remoteViews.setTextViewText(R.id.notification_forecast_info, forecast.weatherMessage.info);
                                 remoteViews.setImageViewBitmap(R.id.notification_forecast_png, Glide.with(getApplicationContext())
                                         .load("http://files.heweather.com/cond_icon/" + forecast.weatherMessage.png + ".png")
                                         .asBitmap().into(40, 40).get());
                             } else if (flag == 2) {
-                                remoteViews.setTextViewText(R.id.notification_forecast_date1, forecast.date.split("-")[1]+"月"+forecast.date.split("-")[2]+"日");
-                                remoteViews.setTextViewText(R.id.notification_forecast_max1, forecast.temperature.max);
-                                remoteViews.setTextViewText(R.id.notification_forecast_min1, forecast.temperature.min);
+                                remoteViews.setTextViewText(R.id.notification_forecast_date1, forecast.date.split("-")[1]+"-"+forecast.date.split("-")[2]);
+                                remoteViews.setTextViewText(R.id.notification_forecast_max1, forecast.temperature.max+ "°C");
+                                remoteViews.setTextViewText(R.id.notification_forecast_min1, forecast.temperature.min+ "°C");
                                 remoteViews.setTextViewText(R.id.notification_forecast_info1, forecast.weatherMessage.info);
                                 remoteViews.setImageViewBitmap(R.id.notification_forecast_png1, Glide.with(getApplicationContext())
                                         .load("http://files.heweather.com/cond_icon/" + forecast.weatherMessage.png + ".png")
                                         .asBitmap().into(40, 40).get());
                             } else if (flag == 3) {
-                                remoteViews.setTextViewText(R.id.notification_forecast_date2, forecast.date.split("-")[1]+"月"+forecast.date.split("-")[2]+"日");
-                                remoteViews.setTextViewText(R.id.notification_forecast_max2, forecast.temperature.max);
-                                remoteViews.setTextViewText(R.id.notification_forecast_min2, forecast.temperature.min);
+                                remoteViews.setTextViewText(R.id.notification_forecast_date2, forecast.date.split("-")[1]+"-"+forecast.date.split("-")[2]);
+                                remoteViews.setTextViewText(R.id.notification_forecast_max2, forecast.temperature.max+ "°C");
+                                remoteViews.setTextViewText(R.id.notification_forecast_min2, forecast.temperature.min+ "°C");
                                 remoteViews.setTextViewText(R.id.notification_forecast_info2, forecast.weatherMessage.info);
                                 remoteViews.setImageViewBitmap(R.id.notification_forecast_png2, Glide.with(getApplicationContext())
                                         .load("http://files.heweather.com/cond_icon/" + forecast.weatherMessage.png + ".png")
@@ -145,7 +145,8 @@ public class UpdateService extends Service {
                             }
                             flag++;
                         }
-                        remoteViews.setImageViewBitmap(R.id.notification_now_png, Glide.with(getApplicationContext()).load("http://files.heweather.com/cond_icon/" + weather1.now.weatherMessage.code + ".png")
+                        remoteViews.setImageViewBitmap(R.id.notification_now_png,Glide.with(getApplicationContext())
+                                .load("http://files.heweather.com/cond_icon/" + weather1.now.weatherMessage.code + ".png")
                                 .asBitmap().into(40, 40).get());//加载当天的天气图标
                     } catch (Exception e) {
                         e.printStackTrace();

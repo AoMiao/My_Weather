@@ -139,6 +139,9 @@ public class WeatherAcitivity extends AppCompatActivity {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
+        //让每次打开app都能获得最新天气信息
+        swipe_refresh.setRefreshing(true);
+        queryFormServer(weatherCode);
 
     }
 

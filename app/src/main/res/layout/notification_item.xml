@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="100dp"
+    android:layout_width="110dp"
     android:layout_height="match_parent"
     android:orientation="vertical">
     <TextView
         android:id="@+id/notification_forecast_date"
+        android:textColor="#fff"
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -13,26 +14,33 @@
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/notification_forecast_png"
+            android:layout_centerVertical="true"
+            android:background="#FFFFFF"
             android:layout_marginLeft="15dp"
             android:layout_width="30dp"
             android:layout_height="30dp" />
         <TextView
             android:id="@+id/notification_forecast_min"
+            android:textColor="#fff"
             android:layout_marginRight="15dp"
             android:layout_alignParentRight="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/notification_forecast_max"
+            android:textColor="#fff"
             android:layout_marginRight="15dp"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/notification_forecast_min"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"/>
     </RelativeLayout>
     <TextView
         android:id="@+id/notification_forecast_info"
+        android:textColor="#fff"
         android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"/>
 </LinearLayout>
