@@ -1,25 +1,27 @@
 package com.vince.my_weather;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.SwitchCompat;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -70,18 +72,32 @@ public class WeatherAcitivity extends AppCompatActivity {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     private ImageView now_png;
     public Weather weather;
+    private Button menu_button;
+    public DrawerLayout drawerLayout_menu;
+    public SwitchCompat intent_service_switch;
+    private SwitchCompat update_service_switch;
+    public TextView exit_button;
+    public int flag = -1;
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            flag = 0;
+        }
 
-
-
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            flag = -1;
+        }
+    };
 
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(Build.VERSION.SDK_INT>=21){//android5.0以上把布局充满整个手机屏幕,并把状态栏设置成透明
+        if (Build.VERSION.SDK_INT >= 21) {//android5.0以上把布局充满整个手机屏幕,并把状态栏设置成透明
             View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         setContentView(R.layout.weather_layout);
@@ -103,11 +119,18 @@ public class WeatherAcitivity extends AppCompatActivity {
         swipe_refresh.setColorSchemeResources(R.color.colorPrimary);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         now_png = (ImageView) findViewById(R.id.now_png);
+        menu_button = (Button) findViewById(R.id.menu_button);
+        drawerLayout_menu = (DrawerLayout) findViewById(R.id.drawer_layout_menu);
+        intent_service_switch = (SwitchCompat) findViewById(R.id.intent_service);
+        update_service_switch = (SwitchCompat) findViewById(R.id.update_service);
+
+
+        exit_button = (TextView) findViewById(R.id.exit_button);
 
 
         SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherCache = spf.getString("weather", null);//获取缓存信息
-        String imgCache = spf.getString("imgCache",null);
+        String imgCache = spf.getString("imgCache", null);
         //定义一个全局变量的天气代码
 
         if (weatherCache != null) {
@@ -115,16 +138,16 @@ public class WeatherAcitivity extends AppCompatActivity {
             weatherCode = weather.basic.weatherCode;//有缓存有从缓存中取出天气代码
             showWeatherInfo(weather);
 
-        }else {
+        } else {
             weatherCode = getIntent().getStringExtra("weatherCode");//没缓存从跳转过来的界面获取天气代码
             weather_scrollview.setVisibility(View.INVISIBLE);//请求数据时把天气界面设为不可见
             queryFormServer(weatherCode);
 
         }
 
-        if(imgCache!=null){//有缓存的话就直接用缓存载图，没有就去访问网络
+        if (imgCache != null) {//有缓存的话就直接用缓存载图，没有就去访问网络
             Glide.with(WeatherAcitivity.this).load(imgCache).into(bing_pic_img);
-        }else {
+        } else {
             setBackgroundImg();
         }
         swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {//下拉刷新
@@ -139,6 +162,53 @@ public class WeatherAcitivity extends AppCompatActivity {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
+        menu_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout_menu.openDrawer(GravityCompat.END);
+            }
+        });
+        intent_service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    Intent intent = new Intent(WeatherAcitivity.this, UpdateService.class);
+                    bindService(intent, connection, BIND_AUTO_CREATE);
+                } else {
+                    unbindService(connection);
+                }
+            }
+        });
+        update_service_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    Intent i = new Intent(getApplicationContext(), UpdateService.class);
+                    PendingIntent pi = PendingIntent.getService(getApplicationContext(), 0, i, 0);
+                    manager.cancel(pi);
+                } else {
+                    AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    int time = 8 * 60 * 60 * 1000;//设置更新时间为8小时
+                    long triggerAtime = SystemClock.elapsedRealtime() + time;
+                    Intent i = new Intent(getApplicationContext(), UpdateService.class);
+                    PendingIntent pi = PendingIntent.getService(getApplicationContext(), 0, i, 0);
+                    manager.cancel(pi);
+                    manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtime, pi);
+                }
+            }
+        });
+        exit_button.setOnClickListener(new View.OnClickListener() {//退出按钮
+            @Override
+            public void onClick(View view) {
+                Intent stop = new Intent(WeatherAcitivity.this, UpdateService.class);
+                stopService(stop);
+                if (flag != -1) {//判断服务被绑定没有
+                    unbindService(connection);
+                }
+                finish();
+            }
+        });
         //让每次打开app都能获得最新天气信息
         swipe_refresh.setRefreshing(true);
         queryFormServer(weatherCode);
@@ -147,17 +217,16 @@ public class WeatherAcitivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Intent intent = new Intent(this,UpdateService.class);
-        stopService(intent);
+
         super.onDestroy();
     }
 
     public void showWeatherInfo(Weather weather) {//显示天气信息
         title_city.setText(weather.basic.cityName);
-        update_time.setText(weather.basic.update.updateTime.split(" ")[1]);
+        update_time.setText(weather.basic.update.updateTime.split(" ")[1] + "发布");
         tmp_text.setText(weather.now.temperature + "°C");
         weather_info_text.setText(weather.now.weatherMessage.info);
-        Glide.with(this).load("http://files.heweather.com/cond_icon/"+weather.now.weatherMessage.code+".png").into(now_png);
+        Glide.with(this).load("http://files.heweather.com/cond_icon/" + weather.now.weatherMessage.code + ".png").into(now_png);
         if (weather.aqi != null) {//有的城市天气没有AQI指数
             aqi_text.setText(weather.aqi.city.aqi);
             pm25_text.setText(weather.aqi.city.pm25);
@@ -176,17 +245,17 @@ public class WeatherAcitivity extends AppCompatActivity {
             TextView forecast_max_text = (TextView) view.findViewById(R.id.max_text);
             TextView forecast_min_text = (TextView) view.findViewById(R.id.min_text);
             ImageView png = (ImageView) view.findViewById(R.id.png);
-            Glide.with(this).load("http://files.heweather.com/cond_icon/"+forecast.weatherMessage.png+".png").into(png);
+            Glide.with(this).load("http://files.heweather.com/cond_icon/" + forecast.weatherMessage.png + ".png").into(png);
             String today = sdf.format(new Date());
-            if(forecast.date.equals(today)){
+            if (forecast.date.equals(today)) {
                 forecast_date_text.setText("今天");
-            }else {
-                forecast_date_text.setText(forecast.date.split("-")[1]+"月"+forecast.date.split("-")[2]+"日");
+            } else {
+                forecast_date_text.setText(forecast.date.split("-")[1] + "月" + forecast.date.split("-")[2] + "日");
             }
             forecast_info_text.setText(forecast.weatherMessage.info);
             forecast_max_text.setText(forecast.temperature.max + "°C");
             forecast_min_text.setText(forecast.temperature.min + "°C");
-            Log.d("ne",forecast.weatherMessage.png);
+            //Log.d("ne",forecast.weatherMessage.png);
             forecast_layout.addView(view);
         }
         weather_scrollview.setVisibility(View.VISIBLE);
@@ -202,7 +271,7 @@ public class WeatherAcitivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(WeatherAcitivity.this,"加载天气失败",Toast.LENGTH_SHORT);
+                        Toast.makeText(WeatherAcitivity.this, "加载天气失败", Toast.LENGTH_SHORT);
                         swipe_refresh.setRefreshing(false);
                     }
                 });
@@ -229,7 +298,7 @@ public class WeatherAcitivity extends AppCompatActivity {
         swipe_refresh.setRefreshing(false);
     }
 
-    public void setBackgroundImg(){
+    public void setBackgroundImg() {
         HttpUtil.sendOkHttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -250,5 +319,14 @@ public class WeatherAcitivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(false);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

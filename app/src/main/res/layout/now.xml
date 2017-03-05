@@ -14,7 +14,8 @@
     <TextView
         android:id="@+id/weather_info_text"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/now_png"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#fff"
@@ -23,8 +24,19 @@
         android:id="@+id/now_png"
         android:background="#FFFFFFFF"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/weather_info_text"
+        android:layout_centerVertical="true"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:scaleType="centerCrop"/>
+
+    <TextView
+        android:textSize="16sp"
+        android:textColor="#fff"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="15dp"
+        android:id="@+id/update_time"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
 </RelativeLayout>

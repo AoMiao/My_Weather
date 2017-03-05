@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -14,12 +13,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.webkit.WebView;
-import android.widget.LinearLayout;
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.vince.my_weather.R;
@@ -32,24 +26,39 @@ import com.vince.my_weather.util.Utility;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-import static com.vince.my_weather.R.id.notification_forecast_date;
-
 public class UpdateService extends Service {
     private SharedPreferences spf;
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private LinearLayout notification_forecast_layout;
-    private LinearLayout forecast_layout;
-    public int flag;
+    public int flag;//计数变量
+    public Notification notification;
 
-    public mBinder mBinder;
+    public mBinder mBinder = new mBinder();
 
-    public UpdateService() {
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d("me", "解绑");//要看到前台
+        startForeground(1,notification);
+        return true;
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        Log.d("me", "重新绑定");
+        stopForeground(true);
+        super.onRebind(intent);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d("me", "初次绑定");
+        stopForeground(true);
+        return mBinder;
     }
 
     public class mBinder extends Binder {
@@ -57,16 +66,12 @@ public class UpdateService extends Service {
     }
 
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        notification_forecast_layout = (LinearLayout) LayoutInflater
-                .from(UpdateService.this).inflate(R.layout.notification_layout, null);
+
 
     }
 
@@ -79,8 +84,8 @@ public class UpdateService extends Service {
         int time = 8 * 60 * 60 * 1000;//设置更新时间为8小时
         long triggerAtime = SystemClock.elapsedRealtime() + time;
 
-        Intent i = new Intent(UpdateService.this, UpdateService.class);
-        PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
+        Intent i = new Intent(getApplicationContext(), UpdateService.class);
+        PendingIntent pi = PendingIntent.getService(getApplicationContext(), 0, i, 0);
 
         manager.cancel(pi);
         manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtime, pi);
@@ -116,7 +121,7 @@ public class UpdateService extends Service {
                         for (Forecast forecast : weather1.forecastList) {
                             if (forecast.date.equals(sdf.format(new Date()))) {
                                 remoteViews.setTextViewText(R.id.notification_now_max, forecast.temperature.max + "°C");
-                                remoteViews.setTextViewText(R.id.notification_now_min, forecast.temperature.min + "°C");
+                                remoteViews.setTextViewText(R.id.notification_now_min, " "+forecast.temperature.min + "°C");
                             }
                             if (flag == 1) {
                                 remoteViews.setTextViewText(R.id.notification_forecast_date, forecast.date.split("-")[1]+"-"+forecast.date.split("-")[2]);
@@ -148,11 +153,18 @@ public class UpdateService extends Service {
                         remoteViews.setImageViewBitmap(R.id.notification_now_png,Glide.with(getApplicationContext())
                                 .load("http://files.heweather.com/cond_icon/" + weather1.now.weatherMessage.code + ".png")
                                 .asBitmap().into(40, 40).get());//加载当天的天气图标
+
+                        notification = new NotificationCompat.Builder(UpdateService.this).setWhen(System.currentTimeMillis())
+                                .setSmallIcon(R.drawable.logo)
+                                .setLargeIcon(Glide.with(getApplicationContext())
+                                        .load("http://files.heweather.com/cond_icon/" + weather1.now.weatherMessage.code + ".png")
+                                        .asBitmap().into(40, 40).get())
+                                .setContentTitle(weather1.now.temperature + "°C")
+                                .setContentText(weather1.basic.cityName)
+                                .build();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    Notification notification = new NotificationCompat.Builder(UpdateService.this).setWhen(System.currentTimeMillis())
-                            .setSmallIcon(R.mipmap.ic_launcher).build();
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         notification.bigContentView = remoteViews;//设置大图
                     }
@@ -190,7 +202,7 @@ public class UpdateService extends Service {
 
     @Override
     public void onDestroy() {
-        stopForeground(true);
+        Log.d("me","onDestroy");
         super.onDestroy();
     }
 
