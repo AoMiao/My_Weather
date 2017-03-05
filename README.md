@@ -5,5 +5,5 @@
         加入前台天气的关闭  
         加入开启和停止后台更新  
 用到的第三方依赖库有:okhttp,gson,glide,litepal  
-      预览图如下：
-      
+      预览图如下：  
+      ![image](http://github.com/AoMiao/My_Weather/raw/master/image/preview1.jpg)
