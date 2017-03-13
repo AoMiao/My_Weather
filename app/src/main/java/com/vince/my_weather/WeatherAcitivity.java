@@ -63,6 +63,7 @@ public class WeatherAcitivity extends AppCompatActivity {
     private TextView comfort_text;
     private TextView carwash_text;
     private TextView sport_text;
+    private TextView dress_text;
 
     private ImageView bing_pic_img;
     public SwipeRefreshLayout swipe_refresh;
@@ -113,6 +114,7 @@ public class WeatherAcitivity extends AppCompatActivity {
         comfort_text = (TextView) findViewById(R.id.comfort_text);
         carwash_text = (TextView) findViewById(R.id.carwash_text);
         sport_text = (TextView) findViewById(R.id.sport_text);
+        dress_text = (TextView) findViewById(R.id.dress_text);
         bing_pic_img = (ImageView) findViewById(R.id.bing_pic_img);//每日一图实例
         swipe_refresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);//下拉刷新的实例
         choose_button = (Button) findViewById(R.id.choose_button);
@@ -235,6 +237,7 @@ public class WeatherAcitivity extends AppCompatActivity {
         comfort_text.setText("舒适度：" + weather.suggestion.comfort.ComfortSuggestion);
         carwash_text.setText("洗车建议：" + weather.suggestion.carWash.CarWashSuggestion);
         sport_text.setText("运动建议：" + weather.suggestion.sport.SportSuggestion);
+        dress_text.setText("穿衣建议：" + weather.suggestion.dress.DressSuggestion);
 
         forecast_layout.removeAllViews();//先把所有的子项清除
         for (Forecast forecast : weather.forecastList) {

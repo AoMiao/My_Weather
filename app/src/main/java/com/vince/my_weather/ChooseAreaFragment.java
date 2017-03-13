@@ -1,6 +1,6 @@
 package com.vince.my_weather;
 
-import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -42,6 +41,7 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
     private int currentLevel;
+    private ProgressDialog progressDialog;
 
     private List<Province> provinceList;
     private List<City> cityList;
@@ -164,9 +164,11 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
     }
 
     public void queryFormServer(String address, final String type) {
+        showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                closeProgressDialog();
                 Log.w(getContext().toString(), "错误");
             }
 
@@ -185,6 +187,7 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
                     getActivity().runOnUiThread(new Runnable() {//回到主线程修改UI
                         @Override
                         public void run() {
+                            closeProgressDialog();
                             if (type.equals("province")) {
                                 queryProvince();
                             } else if (type.equals("city")) {
@@ -200,4 +203,17 @@ public class ChooseAreaFragment extends Fragment {//把省列表数据所有逻�
 
     }
 
+    public void showProgressDialog(){
+        if(progressDialog==null){
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage("正在加载");
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        progressDialog.show();
+    }
+    public void closeProgressDialog(){
+        if(progressDialog!=null){
+            progressDialog.dismiss();
+        }
+    }
 }
