@@ -17,6 +17,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ import java.util.Date;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 /**
  * Created by Administrator on 2017/2/20.
@@ -301,8 +303,34 @@ public class WeatherAcitivity extends AppCompatActivity {
         swipe_refresh.setRefreshing(false);
     }
 
-    public void setBackgroundImg() {
-        HttpUtil.sendOkHttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
+    public void setBackgroundImg() {//注意后面一定要有斜线
+        HttpUtil.retrofit("http://guolin.tech/api/", new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(retrofit2.Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                final String imgCache;
+                try {
+                    imgCache = response.body().string();
+                    Log.d("me",imgCache);
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherAcitivity.this).edit();
+                    editor.putString("imgCache", imgCache);//缓存功能
+                    editor.apply();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {//记得回到主线才能修改UI
+                            Glide.with(WeatherAcitivity.this).load(imgCache).into(bing_pic_img);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
+            }
+        });
+
+        /*HttpUtil.sendOkHttpRequest("http://guolin.tech/api/bing_pic", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -321,7 +349,7 @@ public class WeatherAcitivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        });*/
     }
 
     @Override
